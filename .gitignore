@@ -1,0 +1,6 @@
+~*
+*.sw?
+%temp%
+bin
+obj
+TestResult.xml

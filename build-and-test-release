@@ -1,0 +1,5 @@
+#! /bin/bash
+rm -rv ./*/bin/                  && /
+rm -rv ./*/obj/                  && /
+xbuild /p:Configuration=Release  && /
+nunit-console -labels ./Specs/bin/Release/TaskMan.Specs.dll
