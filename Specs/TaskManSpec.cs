@@ -9,6 +9,7 @@ using TaskMan;
 
 namespace TaskMan.Specs {
 
+    // I don't love these specs.  They're not super clear.  I was in a rush to get this done so I could start writing and running Tasks!
     [TestFixture]
     public class TaskManSpec {
 
@@ -54,7 +55,6 @@ namespace TaskMan.Specs {
 
             Assert.That( Task.Get("foobar").Run(), Is.EqualTo("Foo Bar"));
         }
-
 
         [Test]
         public void CanLoadTasksFromAnAssemblyIntoGlobalTasks() {
@@ -103,7 +103,7 @@ namespace TaskMan.Specs {
         //public void TasksCanRequireThatOtherTasksBeRunAfterIt
 
         // NOTE: Dependencies must be global!
-        // [Task("Foo", Before = "environemnt", After = "this andthis")]
+        // [Task("Foo", Before = "environment", After = "this andthistoo")]
         [Test]
         public void TasksCanRequireThatOtherTasksBeRunBeforeAndAfterIt() {
             Task.LoadTasksFromAssembly(Assembly2Path);
