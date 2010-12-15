@@ -1,0 +1,5 @@
+#! /bin/bash
+rm -rv ./*/bin/  && /
+rm -rv ./*/obj/  && /
+xbuild           && /
+nunit-console -labels ./Specs/bin/Debug/TaskMan.Specs.dll
