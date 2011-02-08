@@ -1,20 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using TaskMan;
 
 namespace TaskMan.Specs.ExampleAssembly1 {
     public class Tasks {
 
         static public int Number = 0;
 
-        [TaskMan.Task("foobar", Description = "Returns 'Foo Bar'")]
+        [Task("foobar", "Returns 'Foo Bar'")]
         public static string ReturnFooBar() {
             return "Foo Bar";
         }
 
-        [TaskMan.Task("increment:number")]
-        public static void IncrementTasksNumber() {
+        [Task]
+        public static void IncrementNumber() {
             Number++;
         }
 

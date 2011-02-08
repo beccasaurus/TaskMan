@@ -10,9 +10,9 @@ using TaskMan;
 namespace TaskMan.Specs {
 
 	// I don't love these specs.  They're not super clear.  I was in a rush to get this done so I could start writing and running Tasks!
+
 	[TestFixture]
 	public class TaskManSpec {
-
 		string Assembly1Path;
 		string Assembly2Path;
 
@@ -21,6 +21,7 @@ namespace TaskMan.Specs {
 
 		[SetUp]
 		public void Setup() {
+			Task.Verbose = true;
 			Task.Clear();
 
 			// Set the paths to our sample assemblies (they build in different places depending on configuration)
@@ -134,32 +135,75 @@ namespace TaskMan.Specs {
 
 		[Test]
 		public void CallingConsoleAppWith1ArgRunsTaskIfFound() {
-			var output = (Assembly1Path + " foobar").Exec();
+			var output = (Assembly1Path + " --verbose foobar").Exec();
 			Assert.That(output, Is.StringContaining("foobar"));
 			Assert.That(output, Is.Not.StringContaining("increment:number"));
 
-			output = (Assembly1Path + " hithere").Exec();
+			output = (Assembly1Path + " --V hithere").Exec();
 			Assert.That(output, Is.StringContaining("Task not found: hithere"));
 			Assert.That(output, Is.Not.StringContaining("foobar"));
 		}
 
 		[Test]
 		public void CallingConsoleAppWithManyArgsRunsManyTasks() {
-			var output = (Assembly1Path + " foobar increment:number").Exec();
+			var output = (Assembly1Path + " -V foobar increment:number").Exec();
 			Assert.That(output, Is.StringContaining("foobar"));
 			Assert.That(output, Is.StringContaining("increment:number"));
 			Assert.That(output, Is.Not.StringContaining("hithere"));
 
-			output = (Assembly1Path + " foobar hithere increment:number").Exec();
+			output = (Assembly1Path + " -V foobar hithere increment:number").Exec();
 			Assert.That(output, Is.StringContaining("foobar"));
 			Assert.That(output, Is.StringContaining("increment:number"));
 			Assert.That(output, Is.StringContaining("Task not found: hithere"));
 			Assert.That(output, Is.Not.StringContaining("Task not found: foobar"));
 		}
 
+		[Test]
+		public void TasksCanBePassedCommandLineVariables() {
+			var output = (Assembly2Path + " with:vars This=That \"FOO=value of foo\" Bar=\"value of Bar\"").Exec();
+			Assert.That(output, Is.StringContaining("Variable This = That"));
+			Assert.That(output, Is.StringContaining("Variable FOO = value of foo"));
+			Assert.That(output, Is.StringContaining("Variable Bar = value of Bar"));
+
+			output = (Assembly2Path + " with:var:collection This=That \"FOO=value of foo\" Bar=\"value of Bar\"").Exec();
+			Assert.That(output, Is.StringContaining("Variable This = That"));
+			Assert.That(output, Is.StringContaining("Variable FOO = value of foo"));
+			Assert.That(output, Is.StringContaining("Variable Bar = value of Bar"));
+		}
+
 		// Someday / Maybe
 		// public void CanExecuteATaskAndNamedVariables() { ???? maybe.  ENV vars work great too tho.
 		// public void LambdaCanBeUsedToDefineATask() {
+	}
+	
+	public static class SpecHelper {
 
+        // "ls -lrt".Exec();
+        public static string Exec(this string str) {
+            return SpecHelper.RunCommand(str);
+        }
+
+        public static string RunCommand(string command) {
+            command   = command.Trim();
+            int space = command.IndexOf(' ');
+            if (space < 0)
+                return RunCommandWithArguments(command, null);
+            else
+                return RunCommandWithArguments(command.Substring(0, space), command.Substring(space + 1));
+        }
+
+        public static string RunCommandWithArguments(string command, string arguments) {
+            var process = new System.Diagnostics.Process();
+            process.StartInfo.FileName = command;
+            if (arguments != null)
+                process.StartInfo.Arguments = arguments;
+            process.StartInfo.UseShellExecute        = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.CreateNoWindow         = true;
+            process.Start();
+            string stdout = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            return stdout;
+        }
 	}
 }

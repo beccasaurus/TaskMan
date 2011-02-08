@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using TaskMan;
 
 namespace TaskMan.Specs.ExampleAssembly2 {
@@ -9,12 +6,12 @@ namespace TaskMan.Specs.ExampleAssembly2 {
 
         static public string output = "";
 
-        [Task("before1", Description = "This is Before #1")]
+        [Task("This is Before #1")]
         public static void Before1() {
             output = "BEFORE1";
         }
 
-        [Task("before2", Description = "Before 2!")]
+        [Task("Before 2!")]
         public static void Before2() {
             output += " before2";
         }
@@ -49,5 +46,17 @@ namespace TaskMan.Specs.ExampleAssembly2 {
         public static void PrintOutput() {
             Console.WriteLine(output);
         }
+
+		[Task]
+		public static void WithVarCollection(System.Collections.Generic.IDictionary<string,string> vars) {
+			foreach (var variable in vars)
+				Console.WriteLine("Variable {0} = {1}", variable.Key, variable.Value);
+		}
+
+		[Task]
+		public static void WithVars(Variables vars) {
+			foreach (var variable in vars)
+				Console.WriteLine("Variable {0} = {1}", variable.Key, variable.Value);
+		}
     }
 }
