@@ -109,6 +109,7 @@ namespace TaskMan {
         public static void Run(string[] args) {
 			HandleAndRemoveGlobalOptions(ref args);
 			var variables = GetAndRemoveVariablesFromArgs(ref args);
+			SetEnvironmentVariables(variables);
 
             if (args.Length == 0)
                 ListTasks();
@@ -223,6 +224,11 @@ namespace TaskMan {
 			}
 			args = arguments.ToArray();
 			return variables;
+		}
+
+		static void SetEnvironmentVariables(Variables vars) {
+			foreach (var variable in vars)
+				Environment.SetEnvironmentVariable(variable.Key, variable.Value);
 		}
 
         static string GetSpacesForList(string taskName, int longestTaskLength, int buffer = 4) {

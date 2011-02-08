@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using TaskMan;
 
 namespace TaskMan.Specs.ExampleAssembly2 {
@@ -57,6 +58,12 @@ namespace TaskMan.Specs.ExampleAssembly2 {
 		public static void WithVars(Variables vars) {
 			foreach (var variable in vars)
 				Console.WriteLine("Variable {0} = {1}", variable.Key, variable.Value);
+		}
+
+		[Task]
+		public static void EnvVariables() {
+			foreach (DictionaryEntry variable in Environment.GetEnvironmentVariables())
+				Console.WriteLine("ENV {0} = {1}", variable.Key, variable.Value);
 		}
     }
 }

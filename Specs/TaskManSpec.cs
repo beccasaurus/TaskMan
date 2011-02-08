@@ -171,6 +171,14 @@ namespace TaskMan.Specs {
 			Assert.That(output, Is.StringContaining("Variable Bar = value of Bar"));
 		}
 
+		[Test]
+		public void CommandLineVariablesSetEnvironmentVariablesForEasyGlobalAccess() {
+			var output = (Assembly2Path + " env:variables This=That \"FOO=value of foo\" Bar=\"value of Bar\"").Exec();
+			Assert.That(output, Is.StringContaining("ENV This = That"));
+			Assert.That(output, Is.StringContaining("ENV FOO = value of foo"));
+			Assert.That(output, Is.StringContaining("ENV Bar = value of Bar"));
+		}
+
 		// Someday / Maybe
 		// public void CanExecuteATaskAndNamedVariables() { ???? maybe.  ENV vars work great too tho.
 		// public void LambdaCanBeUsedToDefineATask() {
