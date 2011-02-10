@@ -164,7 +164,7 @@ namespace TaskMan {
         public static List<Task> AddTasks(List<Task> tasks) {
             if (tasks != null && tasks.Count > 0)
               foreach (var task in tasks)
-                  _allTasks.Add(task.Name, task);
+                  _allTasks[task.Name] = task;
             return tasks;
         }
 
