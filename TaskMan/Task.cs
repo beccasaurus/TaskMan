@@ -88,7 +88,8 @@ namespace TaskMan {
                 throw new Exception("No method implementation found for Task: " + Name);
         }
 
-		public static bool Verbose = false;
+		public static bool Verbose      = false;
+		public static bool ListingTasks = false;
 
 		public static void Log(string message, params object[] objects) {
 			if (Verbose) Console.WriteLine(message, objects);
@@ -111,8 +112,8 @@ namespace TaskMan {
 			var variables = GetAndRemoveVariablesFromArgs(ref args);
 			SetEnvironmentVariables(variables);
 
-            if (args.Length == 0)
-                ListTasks();
+            if (args.Length == 0 || ListingTasks)
+                ListTasks(args);
             else
                 foreach (var task in args)
                     Run(task, variables);
@@ -135,9 +136,25 @@ namespace TaskMan {
                 task.Run(vars);
         }
 
-        public static void ListTasks() {
+        public static void ListTasks(string[] queries) {
             var tasks = Task.All;
 
+            if (queries.Length == 0) {
+				ListTasks(tasks);
+            } else {
+				// select only the tasks with names that match all of our queries
+				var matchingTasks = new List<Task>();
+				foreach (var task in tasks)
+					if (queries.All(query => task.Name.Contains(query)))
+						matchingTasks.Add(task);
+				if (matchingTasks.Count == 0)
+					Console.WriteLine("No tasks contain: {0}", string.Join(", ", queries));
+				else
+					ListTasks(matchingTasks);
+			}
+        }
+
+        public static void ListTasks(List<Task> tasks) {
             if (tasks.Count == 0)
                 Console.WriteLine("No tasks have been defined");
             else {
@@ -145,8 +162,8 @@ namespace TaskMan {
                 var longestTaskLength = (int) tasks.Select(t => t.Name.Length).Max();
                 foreach (var task in tasks.OrderBy(task => task.Name.ToLower()))
                     Console.WriteLine("  {0}{1}{2}", task.Name, GetSpacesForList(task.Name, longestTaskLength), task.Description);
-            }
-        }
+			}
+		}
 
         public static int Count {
             get { return _allTasks.Count; }
@@ -210,6 +227,8 @@ namespace TaskMan {
 			var arguments = new List<string>(args);
 			if (arguments.Remove("-V") || arguments.Remove("--verbose"))
 				Task.Verbose = true;
+			if (arguments.Remove("-T") || arguments.Remove("--tasks"))
+				Task.ListingTasks = true;
 			args = arguments.ToArray();
 		}
 

@@ -134,6 +134,23 @@ namespace TaskMan.Specs {
 		}
 
 		[Test]
+		public void CallingConsoleAppWithTArgumentListsMatchingTasks() {
+			var output = (Assembly1Path + " -T foo").Exec();
+
+			Assert.That(output, Is.StringContaining("foobar"));
+			Assert.That(output, Is.StringContaining("Returns 'Foo Bar'"));
+			Assert.That(output, Is.Not.StringContaining("increment:number"));
+			Assert.That(output, Is.Not.StringContaining("before1"));
+
+			output = (Assembly1Path + " -T number").Exec();
+
+			Assert.That(output, Is.Not.StringContaining("foobar"));
+			Assert.That(output, Is.Not.StringContaining("Returns 'Foo Bar'"));
+			Assert.That(output, Is.StringContaining("increment:number"));
+			Assert.That(output, Is.Not.StringContaining("before1"));
+		}
+
+		[Test]
 		public void CallingConsoleAppWith1ArgRunsTaskIfFound() {
 			var output = (Assembly1Path + " --verbose foobar").Exec();
 			Assert.That(output, Is.StringContaining("foobar"));
