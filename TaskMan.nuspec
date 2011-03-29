@@ -9,6 +9,7 @@
   </metadata>
   <files>
     <file src="src\bin\Release\TaskMan.exe" target="lib" />
+    <file src="src\bin\Release\TaskMan.exe" target="tools" />
     <file src="src\**.cs" />
     <file src="README.markdown" />
   </files>
