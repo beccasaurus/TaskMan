@@ -26,6 +26,7 @@
  */
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Reflection;
@@ -33,6 +34,29 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace TaskMan {
+
+	/// <summary>Main entry point so you can run TaskMan as a standalone executable (if you want to)</summary>
+	public class EntryPoint {
+		public static void Main(string[] args) {
+			var taskDlls = (Environment.GetEnvironmentVariable("TASK_DLLS") ?? "").Split(',')
+								.Select(dll => dll.Trim())
+								.Where(dll => File.Exists(dll))
+								.ToList();
+
+			if (taskDlls.Count == 0) {
+				Console.WriteLine(@"No dlls were found.  Please set TASK_DLLS=path\to\dll.dll,another.dll");
+			} else {
+				foreach (var dll in taskDlls) {
+					try {
+						Task.LoadTasksFromAssembly(dll);
+					} catch (Exception ex) {
+						Console.WriteLine("Failed to load assembly: {0}", dll);
+					}
+				}
+				Task.Run(args);
+			}
+		}
+	}
 
 	public class Variables : Dictionary<string,string>, IDictionary<string,string> {}
 
