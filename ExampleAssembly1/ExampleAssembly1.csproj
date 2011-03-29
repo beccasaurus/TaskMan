@@ -46,7 +46,7 @@
     <Compile Include="Tasks.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TaskMan\TaskMan.csproj">
+    <ProjectReference Include="..\src\TaskMan.csproj">
       <Project>{FDED7B06-5531-4853-A14D-BECD11E579AD}</Project>
       <Name>TaskMan</Name>
     </ProjectReference>

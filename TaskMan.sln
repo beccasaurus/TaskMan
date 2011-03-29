@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskMan", "TaskMan\TaskMan.csproj", "{FDED7B06-5531-4853-A14D-BECD11E579AD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskMan", "src\TaskMan.csproj", "{FDED7B06-5531-4853-A14D-BECD11E579AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Specs", "Specs\Specs.csproj", "{C15B3339-FCD7-415E-8088-7D4B4679276C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Specs", "spec\Specs.csproj", "{C15B3339-FCD7-415E-8088-7D4B4679276C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleAssembly1", "ExampleAssembly1\ExampleAssembly1.csproj", "{B1651AA7-9070-4823-A552-6B594B7D6DAC}"
 EndProject

@@ -2,4 +2,4 @@
 rm -rv ./*/bin/  && /
 rm -rv ./*/obj/  && /
 xbuild           && /
-nunit-console -labels ./Specs/bin/Debug/TaskMan.Specs.dll
+nunit-console -labels ./spec/bin/Debug/TaskMan.Specs.dll
