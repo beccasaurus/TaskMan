@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>TaskMan</id>
+    <version>1.0.0.0</version>
+    <authors>remi Taylor</authors>
+    <description>Easily map .NET methods to command-line tasks (like Rake for .NET)</description>
+    <projectUrl>https://github.com/remi/TaskMan</projectUrl>
+  </metadata>
+  <files>
+    <file src="src\bin\Release\TaskMan.exe" target="lib" />
+    <file src="src\**.cs" />
+    <file src="README.markdown" />
+  </files>
+</package>
