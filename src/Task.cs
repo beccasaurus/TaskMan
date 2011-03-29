@@ -38,29 +38,43 @@ namespace TaskMan {
 	/// <summary>Main entry point so you can run TaskMan as a standalone executable (if you want to)</summary>
 	public class EntryPoint {
 		public static void Main(string[] args) {
-			var taskDlls = (Environment.GetEnvironmentVariable("TASK_DLLS") ?? "").Split(',')
-								.Select(dll => dll.Trim())
-								.Where(dll => File.Exists(dll))
-								.ToList();
-
-			if (taskDlls.Count == 0) {
+			var tasks = Task.LoadTasksFromTaskDlls();
+			if (tasks.Count == 0)
 				Console.WriteLine(@"No dlls were found.  Please set TASK_DLLS=path\to\dll.dll,another.dll");
-			} else {
-				foreach (var dll in taskDlls) {
-					try {
-						Task.LoadTasksFromAssembly(dll);
-					} catch (Exception ex) {
-						Console.WriteLine("Failed to load assembly: {0}", dll);
-					}
-				}
+			else
 				Task.Run(args);
-			}
 		}
 	}
 
 	public class Variables : Dictionary<string,string>, IDictionary<string,string> {}
 
     public class Task {
+
+		/// <summary>Returns a list of all Tasks found from the TASK_DLLS environment variable</summary>
+		public static List<Task> GetTasksFromTaskDlls() {
+			var tasks    = new List<Task>();
+			var taskDlls = (Environment.GetEnvironmentVariable("TASK_DLLS") ?? "").Split(',')
+								.Select(dll => dll.Trim())
+								.Where(dll => File.Exists(dll))
+								.ToList();
+
+			foreach (var dll in taskDlls) {
+				try {
+					tasks.AddRange(GetTasksFromAssembly(dll));
+				} catch (Exception ex) {
+					Console.WriteLine("Failed to load assembly: {0}", dll);
+				}
+			}
+
+			return tasks;
+		}
+
+		/// <summary>Loads all Tasks found from the TASK_DLLS environment variable</summary>
+		public static List<Task> LoadTasksFromTaskDlls() {
+			var tasks = GetTasksFromTaskDlls();
+            Task.AddTasks(tasks);
+			return tasks;
+		}
 
 		// TODO remove this?  obsolete?  a task won't work without an attribute.
         public Task() { }
