@@ -54,7 +54,7 @@ namespace TaskMan {
 		public static List<Task> GetTasksFromTaskDlls() {
 			var tasks    = new List<Task>();
 			var taskDlls = (Environment.GetEnvironmentVariable("TASK_DLLS") ?? "").Split(',')
-								.Select(dll => dll.Trim())
+								.Select(dll => Path.GetFullPath(dll))
 								.Where(dll => File.Exists(dll))
 								.ToList();
 
@@ -63,6 +63,7 @@ namespace TaskMan {
 					tasks.AddRange(GetTasksFromAssembly(dll));
 				} catch (Exception ex) {
 					Console.WriteLine("Failed to load assembly: {0}", dll);
+					Console.WriteLine("{0}", ex);
 				}
 			}
 
