@@ -54,8 +54,8 @@ namespace TaskMan {
 		public static List<Task> GetTasksFromTaskDlls() {
 			var tasks    = new List<Task>();
 			var taskDlls = (Environment.GetEnvironmentVariable("TASK_DLLS") ?? "").Split(',')
-								.Select(dll => Path.GetFullPath(dll))
 								.Where(dll => File.Exists(dll))
+								.Select(dll => Path.GetFullPath(dll))
 								.ToList();
 
 			foreach (var dll in taskDlls) {
@@ -236,21 +236,47 @@ namespace TaskMan {
             return Task.AddTasks(GetTasksFromAssembly(assemblyPath));
         }
 
+		public static bool HookedUpAssemblyResolution = false;
+
+		public static void HookUpAssemblyResolution() {
+			HookedUpAssemblyResolution = true;
+			AppDomain.CurrentDomain.AssemblyResolve += (s,e) => {
+				var dir  = Path.GetDirectoryName(e.RequestingAssembly.Location);
+				var path = Path.Combine(dir, new AssemblyName(e.Name).Name + ".dll");
+
+				if (File.Exists(path))
+					return Assembly.LoadFile(path);
+				else
+					throw new Exception(string.Format(
+						"Assembly {0} depends on {1}. We couldn't find it. We looked here: {2}",
+						e.RequestingAssembly, e.Name, path
+					));
+			};
+		}
+
         public static List<Task> GetTasksFromAssembly(string assemblyPath, bool addToGlobalTasks = false) {
+			if (! HookedUpAssemblyResolution)
+				HookUpAssemblyResolution();
             return GetTasksFromAssembly(Assembly.LoadFile(assemblyPath), addToGlobalTasks);
         }
 
         public static List<Task> GetTasksFromAssembly(Assembly assembly, bool addToGlobalTasks = false) {
             var tasks = new List<Task>();
-            foreach (Type type in assembly.GetTypes()) {
-                foreach (MethodInfo method in type.GetMethods()) { // TODO update GetMethods to just get Public Static methods
-                    var attributes = method.GetCustomAttributes(typeof(TaskAttribute), true);
-                    if (attributes.Length > 0)
-                        tasks.Add(new Task(attributes[0] as TaskAttribute){ Method = method });
-                }
-            }
-            if (addToGlobalTasks) AddTasks(tasks);
-            return tasks;
+			try {
+				foreach (Type type in assembly.GetTypes()) {
+					foreach (MethodInfo method in type.GetMethods()) { // TODO update GetMethods to just get Public Static methods
+						var attributes = method.GetCustomAttributes(typeof(TaskAttribute), true);
+						if (attributes.Length > 0)
+							tasks.Add(new Task(attributes[0] as TaskAttribute){ Method = method });
+					}
+				}
+				if (addToGlobalTasks) AddTasks(tasks);
+				return tasks;
+			} catch (ReflectionTypeLoadException ex) {
+				Console.WriteLine("Failed to GetTypes() from assembly: {0}", assembly);
+				Console.WriteLine("Loader Exceptions: {0}", ex.LoaderExceptions);
+				throw ex;
+			}
         }
 
 		#region Private
