@@ -48,15 +48,15 @@ namespace TaskMan {
 
 	public class Variables : Dictionary<string,string>, IDictionary<string,string> {}
 
-    public class Task {
+	public class Task {
 
 		/// <summary>Returns a list of all Tasks found from the TASK_DLLS environment variable</summary>
 		public static List<Task> GetTasksFromTaskDlls() {
 			var tasks    = new List<Task>();
 			var taskDlls = (Environment.GetEnvironmentVariable("TASK_DLLS") ?? "").Split(',')
-								.Where(dll => File.Exists(dll))
-								.Select(dll => Path.GetFullPath(dll))
-								.ToList();
+				.Where(dll => File.Exists(dll))
+				.Select(dll => Path.GetFullPath(dll))
+				.ToList();
 
 			foreach (var dll in taskDlls) {
 				try {
@@ -73,59 +73,59 @@ namespace TaskMan {
 		/// <summary>Loads all Tasks found from the TASK_DLLS environment variable</summary>
 		public static List<Task> LoadTasksFromTaskDlls() {
 			var tasks = GetTasksFromTaskDlls();
-            Task.AddTasks(tasks);
+			Task.AddTasks(tasks);
 			return tasks;
 		}
 
 		// TODO remove this?  obsolete?  a task won't work without an attribute.
-        public Task() { }
+		public Task() { }
 
-        public Task(TaskAttribute attribute) {
-            _attribute = attribute;
-        }
+		public Task(TaskAttribute attribute) {
+			_attribute = attribute;
+		}
 
-        TaskAttribute _attribute;
-        static Dictionary<string, Task> _allTasks  = new Dictionary<string, Task>();
+		TaskAttribute _attribute;
+		static Dictionary<string, Task> _allTasks  = new Dictionary<string, Task>();
 
-        public MethodInfo Method      { get; set; }
-        public string     Description { get { return _attribute.Description;            }}
-        public string     Before      { get { return _attribute.Before;                 }}
-        public string     After       { get { return _attribute.After;                  }}
-        public string     Name        { get { return _attribute.Name ?? NameFromMethod; }}
+		public MethodInfo Method      { get; set; }
+		public string     Description { get { return _attribute.Description;            }}
+		public string     Before      { get { return _attribute.Before;                 }}
+		public string     After       { get { return _attribute.After;                  }}
+		public string     Name        { get { return _attribute.Name ?? NameFromMethod; }}
 
 		public string NameFromMethod {
 			get { return Regex.Replace(Method.Name, "([a-z])([A-Z])", "$1:$2").ToLower(); }
 		}
 
-        public object Run() {
+		public object Run() {
 			return Run(null as Variables);
 		}
 
-        public object Run(Variables vars) {
-            if (Method != null) {
+		public object Run(Variables vars) {
+			if (Method != null) {
 				Log("Run: {0}", Name);
-				
+
 				if (Before != null) {
 					Log("Before: {0}", Before);
 					RunCallbacks(Before);
 				}
 
 				Log("Invoke: {0}.{1}", Method.DeclaringType.FullName, Method.Name);
-                object result;
+				object result;
 				if (Method.GetParameters().Length == 1)
 					result = Method.Invoke(null, new object[]{ vars });
 				else
 					result = Method.Invoke(null, null);
-				
+
 				if (After != null) {
 					Log("After: {0}", After);
 					RunCallbacks(After);
 				}
 
-                return result;
-            } else
-                throw new Exception("No method implementation found for Task: " + Name);
-        }
+				return result;
+			} else
+				throw new Exception("No method implementation found for Task: " + Name);
+		}
 
 		public static bool Verbose      = false;
 		public static bool ListingTasks = false;
@@ -134,53 +134,53 @@ namespace TaskMan {
 			if (Verbose) Console.WriteLine(message, objects);
 		}
 
-        // Clears all tasks
-        public static void Clear() {
-            _allTasks.Clear();
-        }
+		// Clears all tasks
+		public static void Clear() {
+			_allTasks.Clear();
+		}
 
-        // Meant to be called from Main entry point, being passed command-line arguments
-        //
-        // Usage:
-        //
-        //   C:\Foo.Tasks.exe          # lists all available tasks
-        //   C:\Foo.Tasks.exe foo:bar  # calls a task named "foo:bar"
-        //
-        public static void Run(string[] args) {
+		// Meant to be called from Main entry point, being passed command-line arguments
+		//
+		// Usage:
+		//
+		//   C:\Foo.Tasks.exe          # lists all available tasks
+		//   C:\Foo.Tasks.exe foo:bar  # calls a task named "foo:bar"
+		//
+		public static void Run(string[] args) {
 			HandleAndRemoveGlobalOptions(ref args);
 			var variables = GetAndRemoveVariablesFromArgs(ref args);
 			SetEnvironmentVariables(variables);
 
-            if (args.Length == 0 || ListingTasks)
-                ListTasks(args);
-            else
-                foreach (var task in args)
-                    Run(task, variables);
-        }
+			if (args.Length == 0 || ListingTasks)
+				ListTasks(args);
+			else
+				foreach (var task in args)
+					Run(task, variables);
+		}
 
-        public static void Run(string taskName) {
+		public static void Run(string taskName) {
 			Run(taskName, null);
 		}
 
-        public static void Run(string taskName, Variables vars) {
-            CallTask(taskName, vars);
-        }
+		public static void Run(string taskName, Variables vars) {
+			CallTask(taskName, vars);
+		}
 
-        public static void CallTask(string taskName, Variables vars) {
-            var task = Task.Get(taskName);
+		public static void CallTask(string taskName, Variables vars) {
+			var task = Task.Get(taskName);
 
-            if (task == null)
-                Console.WriteLine("Task not found: {0}", taskName);
-            else
-                task.Run(vars);
-        }
+			if (task == null)
+				Console.WriteLine("Task not found: {0}", taskName);
+			else
+				task.Run(vars);
+		}
 
-        public static void ListTasks(string[] queries) {
-            var tasks = Task.All;
+		public static void ListTasks(string[] queries) {
+			var tasks = Task.All;
 
-            if (queries.Length == 0) {
+			if (queries.Length == 0) {
 				ListTasks(tasks);
-            } else {
+			} else {
 				// select only the tasks with names that match all of our queries
 				var matchingTasks = new List<Task>();
 				foreach (var task in tasks)
@@ -191,50 +191,50 @@ namespace TaskMan {
 				else
 					ListTasks(matchingTasks);
 			}
-        }
+		}
 
-        public static void ListTasks(List<Task> tasks) {
-            if (tasks.Count == 0)
-                Console.WriteLine("No tasks have been defined");
-            else {
-                Console.WriteLine("Tasks:");
-                var longestTaskLength = (int) tasks.Select(t => t.Name.Length).Max();
-                foreach (var task in tasks.OrderBy(task => task.Name.ToLower()))
-                    Console.WriteLine("  {0}{1}{2}", task.Name, GetSpacesForList(task.Name, longestTaskLength), task.Description);
+		public static void ListTasks(List<Task> tasks) {
+			if (tasks.Count == 0)
+				Console.WriteLine("No tasks have been defined");
+			else {
+				Console.WriteLine("Tasks:");
+				var longestTaskLength = (int) tasks.Select(t => t.Name.Length).Max();
+				foreach (var task in tasks.OrderBy(task => task.Name.ToLower()))
+					Console.WriteLine("  {0}{1}{2}", task.Name, GetSpacesForList(task.Name, longestTaskLength), task.Description);
 			}
 		}
 
-        public static int Count {
-            get { return _allTasks.Count; }
-        }
+		public static int Count {
+			get { return _allTasks.Count; }
+		}
 
-        public static List<Task> All {
-            get {
-                if (_allTasks.Count == 0)
-                    AddTasks(GetTasksFromAssembly(Assembly.GetEntryAssembly()));
-                return new List<Task>(_allTasks.Values);
-            }
-        }
+		public static List<Task> All {
+			get {
+				if (_allTasks.Count == 0)
+					AddTasks(GetTasksFromAssembly(Assembly.GetEntryAssembly()));
+				return new List<Task>(_allTasks.Values);
+			}
+		}
 
-        // Adds a list of tasks to the global scope of tasks.
-        public static List<Task> AddTasks(List<Task> tasks) {
-            if (tasks != null && tasks.Count > 0)
-              foreach (var task in tasks)
-                  _allTasks[task.Name] = task;
-            return tasks;
-        }
+		// Adds a list of tasks to the global scope of tasks.
+		public static List<Task> AddTasks(List<Task> tasks) {
+			if (tasks != null && tasks.Count > 0)
+				foreach (var task in tasks)
+					_allTasks[task.Name] = task;
+			return tasks;
+		}
 
-        public static Task Get(string name) {
-            return All.FirstOrDefault<Task>(task => task.Name == name);
-        }
+		public static Task Get(string name) {
+			return All.FirstOrDefault<Task>(task => task.Name == name);
+		}
 
-        public static List<Task> LoadTasksFromAssembly(Assembly assembly) {
-            return Task.AddTasks(GetTasksFromAssembly(assembly));
-        }
+		public static List<Task> LoadTasksFromAssembly(Assembly assembly) {
+			return Task.AddTasks(GetTasksFromAssembly(assembly));
+		}
 
-        public static List<Task> LoadTasksFromAssembly(string assemblyPath) {
-            return Task.AddTasks(GetTasksFromAssembly(assemblyPath));
-        }
+		public static List<Task> LoadTasksFromAssembly(string assemblyPath) {
+			return Task.AddTasks(GetTasksFromAssembly(assemblyPath));
+		}
 
 		public static bool HookedUpAssemblyResolution = false;
 
@@ -248,20 +248,20 @@ namespace TaskMan {
 					return Assembly.LoadFile(path);
 				else
 					throw new Exception(string.Format(
-						"Assembly {0} depends on {1}. We couldn't find it. We looked here: {2}",
-						e.RequestingAssembly, e.Name, path
-					));
+								"Assembly {0} depends on {1}. We couldn't find it. We looked here: {2}",
+								e.RequestingAssembly, e.Name, path
+								));
 			};
 		}
 
-        public static List<Task> GetTasksFromAssembly(string assemblyPath, bool addToGlobalTasks = false) {
+		public static List<Task> GetTasksFromAssembly(string assemblyPath, bool addToGlobalTasks = false) {
 			if (! HookedUpAssemblyResolution)
 				HookUpAssemblyResolution();
-            return GetTasksFromAssembly(Assembly.LoadFile(assemblyPath), addToGlobalTasks);
-        }
+			return GetTasksFromAssembly(Assembly.LoadFile(assemblyPath), addToGlobalTasks);
+		}
 
-        public static List<Task> GetTasksFromAssembly(Assembly assembly, bool addToGlobalTasks = false) {
-            var tasks = new List<Task>();
+		public static List<Task> GetTasksFromAssembly(Assembly assembly, bool addToGlobalTasks = false) {
+			var tasks = new List<Task>();
 			try {
 				foreach (Type type in assembly.GetTypes()) {
 					foreach (MethodInfo method in type.GetMethods()) { // TODO update GetMethods to just get Public Static methods
@@ -277,16 +277,16 @@ namespace TaskMan {
 				Console.WriteLine("Loader Exceptions: {0}", ex.LoaderExceptions);
 				throw ex;
 			}
-        }
+		}
 
-		#region Private
-        void RunCallbacks(string taskNamesString) {
-            if (taskNamesString != null) {
-                var taskNames = taskNamesString.Split(' ');
-                foreach (var taskName in taskNames)
-                    Run(taskName);
-            }
-        }
+#region Private
+		void RunCallbacks(string taskNamesString) {
+			if (taskNamesString != null) {
+				var taskNames = taskNamesString.Split(' ');
+				foreach (var taskName in taskNames)
+					Run(taskName);
+			}
+		}
 
 		static void HandleAndRemoveGlobalOptions(ref string[] args) {
 			var arguments = new List<string>(args);
@@ -315,28 +315,28 @@ namespace TaskMan {
 				Environment.SetEnvironmentVariable(variable.Key, variable.Value);
 		}
 
-        static string GetSpacesForList(string taskName, int longestTaskLength, int buffer = 4) {
-            var numSpaces = longestTaskLength + buffer - taskName.Length;
-            var spaces    = "";
-            for (var i = 0; i < numSpaces; i++)
-                spaces += " ";
-            return spaces;
-        }
-		#endregion
-    }
+		static string GetSpacesForList(string taskName, int longestTaskLength, int buffer = 4) {
+			var numSpaces = longestTaskLength + buffer - taskName.Length;
+			var spaces    = "";
+			for (var i = 0; i < numSpaces; i++)
+				spaces += " ";
+			return spaces;
+		}
+#endregion
+	}
 
-    public class TaskAttribute : Attribute {
+	public class TaskAttribute : Attribute {
 		public TaskAttribute(){}
-        public TaskAttribute(string description) : this () {
+		public TaskAttribute(string description) : this () {
 			Description = description;
-        }
-        public TaskAttribute(string name, string description) : this(description) {
+		}
+		public TaskAttribute(string name, string description) : this(description) {
 			Name = name;
-        }
+		}
 
-        public string Name        { get; set; }
-        public string Description { get; set; }
-        public string Before      { get; set; }
-        public string After       { get; set; }
-    }
+		public string Name        { get; set; }
+		public string Description { get; set; }
+		public string Before      { get; set; }
+		public string After       { get; set; }
+	}
 }
