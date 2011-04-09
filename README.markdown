@@ -10,11 +10,7 @@ Inspired by [Rake][]
 Download
 --------
 
-Latest version: 1.0.0.0
-
-[Download .dll][]
-
-[Browse Source][]
+    Install-Package TaskMan
 
 Usage
 -----
@@ -79,6 +75,18 @@ Yep!  That's it.  You can now excute 1 or many of your methods from the command-
     I print out some complicated reports
     stats
     I print out some complicated tasks
+
+Running Tasks
+-------------
+
+To run tasks, you can include `Tasks.cs` in your project or reference `TaskMan.exe` and 
+manually run `TaskMan.Task.Run(args)`
+
+**Or** you can run TaskMan.exe.  It will load assemblies specified in the `TASK_DLLS` environment 
+variable (comma delimited).  So you can:
+
+    # This will load all Tasks from Foo.dll and C:\Bar.dll
+    TASK_DLLS=Foo.dll,C:\Bar.dll TaskMan.exe
 
 Examples
 --------
